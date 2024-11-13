@@ -1,0 +1,63 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI Computability
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Run this workflow at 02:15 UTC every Tuesday to keep the cache from being
+    # evicted. A typical run with everything cached should take less than 10
+    # minutes.
+    - cron: 15 2 * * TUE
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  # Set this to the version of Coq that should be used.
+  coq-version: 8.16.0
+  dune-version: 3.16.1
+  DUNE_CACHE_STORAGE_MODE: copy
+
+jobs:
+  build:
+    name: Build Computability
+    runs-on: ubuntu-22.04
+
+    steps:
+      # Checkout UniMath into the working directory
+      - name: Checkout UniMath.
+        uses: actions/checkout@v3
+        with:
+          repository: UniMath/UniMath
+          clean: false
+          path: .
+
+      # Checkout the current branch into SetHITs/
+      - name: Checkout Computability.
+        uses: actions/checkout@v3
+        with:
+          path: Computability
+
+      # Ideally we would use docker-coq. A setup currently takes about 7min
+      # before it starts compiling, with OCaml cached.
+      - name: Install OCaml.
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ocaml-variants.4.14.0+options,ocaml-option-flambda
+          dune-cache: true
+          opam-disable-sandboxing: true
+
+      - name: Install Dune
+        run: opam pin add dune ${{ env.dune-version }}
+      - name: Install Coq
+        run: opam pin add coq ${{ env.coq-version }}
+
+        # SetHITs is built using the flags specified in code/dune.
+      - name: Compile Computability.
+        run: opam exec -- dune build Computability --display=short --error-reporting=twice

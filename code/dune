@@ -1,0 +1,6 @@
+(include_subdirs qualified)
+
+(coq.theory
+ (name Computability)
+ (flags -w -notation-overridden -type-in-type)
+ (theories UniMath))
