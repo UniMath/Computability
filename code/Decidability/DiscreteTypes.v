@@ -1,4 +1,4 @@
-Require Export UniMath.Foundations.All.
+Require Import init.imports.
   
 Section EqualityDeciders.
 

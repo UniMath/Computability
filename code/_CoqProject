@@ -5,8 +5,7 @@ COQDEP = coqdep
 -arg "-w -notation-overridden -type-in-type"
 
 init/imports.v
+init/all.v
 
 Decidability/DecidablePredicates.v
 Decidability/DiscreteTypes.v
-
-
