@@ -30,6 +30,7 @@ nlia.cache
 nra.cache
 Makefile
 Makefile.conf
+*/CoqMakefile.conf
 *.d
 *.pdf
 *.log
@@ -39,3 +40,4 @@ Makefile.conf
 *.blg
 *.vok
 *.vos
+_build/

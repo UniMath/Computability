@@ -1,3 +1,3 @@
 (lang dune 3.16)
-(using coq 0.6)
+(using coq 0.8)
 (name Computability)

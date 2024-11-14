@@ -1,0 +1,12 @@
+COQC = coqc
+COQDEP = coqdep
+-R . "sem"
+
+-arg "-w -notation-overridden -type-in-type"
+
+init/imports.v
+
+Decidability/DecidablePredicates.v
+Decidability/DiscreteTypes.v
+
+
