@@ -9,3 +9,5 @@ init/all.v
 
 Decidability/DecidablePredicates.v
 Decidability/DiscreteTypes.v
+
+Reducibility/ManyOneReductions.v
