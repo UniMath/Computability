@@ -98,6 +98,52 @@ Section EqualityDeciders.
   Qed.
 End EqualityDeciders.
 
+Section ClosureProperties.
+  
+  Lemma isdeceqdirprod (X : UU) (Y : UU) : (isdeceq X) → (isdeceq Y) → (isdeceq (X × Y)). 
+  Proof.
+    intros isdx isdy [x1 x2] [y1 y2]. 
+    induction (isdx x1 y1), (isdy x2 y2).
+    - left. 
+      exact (pathsdirprod a p). 
+    - right; intros b.
+      apply n.
+      exact (maponpaths dirprod_pr2 b).
+    - right; intros n.
+      apply b.
+      exact (maponpaths dirprod_pr1 n).
+    - right; intros c.
+      apply b.
+      exact (maponpaths dirprod_pr1 c).
+  Qed.
+    
+  Lemma isdeceqcoprod (X : UU) (Y : UU) : (isdeceq X) → (isdeceq Y) → (isdeceq (X ⨿ Y)). 
+  Proof.
+    intros isdx isdy [x | x] [y | y].
+    - induction (isdx x y).
+      + left.
+        exact (maponpaths inl a).
+      + right. intros inl.
+        apply b.
+        use ii1_injectivity.
+        * exact Y.
+        * exact inl.
+    - exact (ii2 (@negpathsii1ii2 X Y x y)).
+    - exact (ii2 (@negpathsii2ii1 X Y y x)).
+    - induction (isdy x y).
+      + exact (ii1 (maponpaths inr a)).
+      + right; intros inr; apply b.
+        use ii2_injectivity.
+        * exact X.
+        * exact inr.
+  Qed.
+
+
+  
+  
+End ClosureProperties.
+
+
 Section ChoiceFunction.
 
 End ChoiceFunction.
