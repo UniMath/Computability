@@ -12,7 +12,7 @@ Definition make_reduction {X Y : UU} (p : X → hProp) (q : Y → hProp) (f : X 
 
 Definition ismanyonereducible {X Y : UU} (p : X → hProp) (q : Y → hProp) := ∥reduction p q∥.
 
-Notation "p ≼ q" := (ismanyonereducible p q) (at level 500).
+Notation "p ≼ₘ q" := (ismanyonereducible p q) (at level 500).
 
 Lemma isapropismanyonereduction {X Y : UU} (p : X → hProp) (q : Y → hProp) (f : X → Y) : (isaprop (ismanyonereduction p q f)).
 Proof.
@@ -20,7 +20,7 @@ Proof.
   apply isapropdirprod; apply isapropimpl; apply propproperty.
 Qed.
 
-Lemma reductiontodecidability {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ q) → (deptypeddecider q) → (deptypeddecider p).
+Lemma reductiontodecidability {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ₘ q) → (deptypeddecider q) → (deptypeddecider p).
 Proof.
   intros rct dep1.
   use squash_to_prop.
@@ -58,13 +58,13 @@ Proof.
     + exact (rf2 (rg2 pp)).
 Qed.
 
-Lemma isreduciblerefl {X : UU} (p : X → hProp) : (p ≼ p).
+Lemma isreduciblerefl {X : UU} (p : X → hProp) : (p ≼ₘ p).
 Proof.
   apply hinhpr.
   apply reductionrefl.
 Qed.
 
-Lemma isreduciblecomp {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ q) → (q ≼ r) → (p ≼ r).
+Lemma isreduciblecomp {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ₘ q) → (q ≼ₘ r) → (p ≼ₘ r).
 Proof.
   apply hinhfun2.
   apply reductioncomp.
@@ -107,13 +107,13 @@ Proof.
   - apply isreduction_ii2.
 Defined.
 
-Lemma isreducible_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ (p + q)).
+Lemma isreducible_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ₘ (p + q)).
 Proof.
   apply hinhpr.
   apply reduction_coprod1.
 Qed.
 
-Lemma isreducible_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (q ≼ (p + q)).
+Lemma isreducible_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (q ≼ₘ (p + q)).
 Proof.
   apply hinhpr.
   apply reduction_coprod2.
@@ -135,7 +135,7 @@ Proof.
   - exact (isreduction_sumofmaps p q r f g irf irg).
 Defined.
 
-Lemma isreducible_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ r) → (q≼ r) → ((p + q) ≼ r).
+Lemma isreducible_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ₘ r) → (q≼ₘ r) → ((p + q) ≼ₘ r).
 Proof.
   apply hinhfun2, reduction_coprod.
 Qed.
@@ -161,7 +161,7 @@ Proof.
   exact (make_reduction (predcompl p) (predcompl q) (pr1 rect) (isreductioncompl p q (pr1 rect) (pr2 rect))).
 Defined.
 
-Lemma isreduciblecompl {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ q) → ((predcompl p) ≼ (predcompl q)).
+Lemma isreduciblecompl {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ₘ q) → ((predcompl p) ≼ₘ (predcompl q)).
 Proof.
   intros rdct.
   use squash_to_prop.
@@ -193,7 +193,7 @@ Proof.
   exact (ny (f x)).
 Qed.
 
-Lemma isreduciblestable {X Y : UU} (p : X → hProp) (q : Y → hProp) : (isstable q) → (p ≼ q) → (isstable p).
+Lemma isreduciblestable {X Y : UU} (p : X → hProp) (q : Y → hProp) : (isstable q) → (p ≼ₘ q) → (isstable p).
 Proof.
   intros.
   use squash_to_prop.

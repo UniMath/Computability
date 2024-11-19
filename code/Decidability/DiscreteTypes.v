@@ -136,10 +136,7 @@ Section ClosureProperties.
         use ii2_injectivity.
         * exact X.
         * exact inr.
-  Qed.
-
-
-  
+  Qed. 
   
 End ClosureProperties.
 
