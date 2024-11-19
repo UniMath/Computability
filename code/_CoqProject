@@ -2,11 +2,12 @@ COQC = coqc
 COQDEP = coqdep
 -R . "sem"
 
--arg "-w -notation-overridden -type-in-type"
+-o -arg "-w -notation-overridden -type-in-type"
 
 init/imports.v
+init/all.v
+
+Inductive/Option.v
 
 Decidability/DecidablePredicates.v
 Decidability/DiscreteTypes.v
-
-
