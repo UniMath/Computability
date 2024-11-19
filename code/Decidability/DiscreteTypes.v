@@ -1,4 +1,7 @@
 Require Import init.imports.
+Require Import UniMath.Combinatorics.Lists.
+Require Import UniMath.Combinatorics.MoreLists.
+Require Import Inductive.Option.
   
 Section EqualityDeciders.
 
@@ -97,6 +100,97 @@ Section EqualityDeciders.
       + exact (isapropeqdecider X).
   Qed.
 End EqualityDeciders.
+
+Section ClosureProperties.
+  
+  Lemma isdeceqdirprod (X : UU) (Y : UU) : (isdeceq X) → (isdeceq Y) → (isdeceq (X × Y)). 
+  Proof.
+    intros isdx isdy [x1 x2] [y1 y2]. 
+    induction (isdx x1 y1), (isdy x2 y2).
+    - left. 
+      exact (pathsdirprod a p). 
+    - right; intros b.
+      apply n.
+      exact (maponpaths dirprod_pr2 b).
+    - right; intros n.
+      apply b.
+      exact (maponpaths dirprod_pr1 n).
+    - right; intros c.
+      apply b.
+      exact (maponpaths dirprod_pr1 c).
+  Qed.
+    
+  Lemma isdeceqcoprod (X : UU) (Y : UU) : (isdeceq X) → (isdeceq Y) → (isdeceq (X ⨿ Y)). 
+  Proof.
+    intros isdx isdy [x | x] [y | y].
+    - induction (isdx x y).
+      + left.
+        exact (maponpaths inl a).
+      + right. intros inl.
+        apply b.
+        use ii1_injectivity.
+        * exact Y.
+        * exact inl.
+    - exact (ii2 (@negpathsii1ii2 X Y x y)).
+    - exact (ii2 (@negpathsii2ii1 X Y y x)).
+    - induction (isdy x y).
+      + exact (ii1 (maponpaths inr a)).
+      + right; intros inr; apply b.
+        use ii2_injectivity.
+        * exact X.
+        * exact inr.
+  Qed.
+
+  Definition nopathsnilcons {X : UU} (a : X) (l : list X) : ¬ (nil = (cons a l)). 
+  Proof.
+    intros eq.
+    set (P := (@list_ind X (λ _, UU) unit (λ _ _ _, empty))).
+    exact (@transportf (list X) P nil (cons a l) eq tt). 
+  Qed.
+
+  Definition nopathsconsnil {X : UU} (a : X) (l : list X) : ¬ ((cons a l) = nil).
+  Proof.
+    intros eq.
+    set (P := (@list_ind X (λ _, UU) empty (λ _ _ _, unit))).
+    exact (@transportf (list X) P (cons a l) nil eq tt). 
+  Qed.
+
+  Lemma isdeceqlist (X : UU) : (isdeceq X) → (isdeceq (list X)).
+  Proof.
+    intros isdx. 
+    use list_ind; cbv beta.
+    - use list_ind; cbv beta.
+      + left; apply idpath.
+      + intros. right. 
+        apply nopathsnilcons.
+    - intros x xs Ih.  
+      use list_ind; cbv beta.
+      + right. apply nopathsconsnil.
+      + intros x0 xs0 deceq. 
+        induction (Ih xs0), (isdx x x0).
+        * induction a, p.
+          left. apply idpath. 
+        * right. intros eq.
+          exact (n (cons_inj1 x x0 xs xs0 eq)).
+        * right. intros eq.
+          exact (b (cons_inj2 x x0 xs xs0 eq)).
+        * right. intros eq.
+          exact (b (cons_inj2 x x0 xs xs0 eq)).
+  Qed.
+
+  Lemma isdeceqoption (X : UU) : (isdeceq X) → (isdeceq (@option X)).
+  Proof.
+    intros isdx. 
+    intros o1 o2.
+    induction o1, o2.
+    - induction (isdx a x).
+      + induction a0. left. apply idpath. 
+      + right. intros eq. apply b, some_injectivity. exact eq.
+    - right. induction u. apply nopathssomenone.
+    - right; induction b. apply nopathsnonesome.
+    - left; induction u, b. apply idpath.
+  Qed.
+End ClosureProperties.
 
 Section ChoiceFunction.
 
