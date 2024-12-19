@@ -99,7 +99,9 @@ Section EmbedNaturals.
         
   Lemma embedinv (n : nat) : (embed (unembed n)) = n.
   Proof.
-    (*TODO*)
+    assert (eq : ∏ (m : nat × nat), unembed n = m → n = embed m).
+    - admit.  
+    - rewrite <- (eq (unembed n)); apply idpath; apply idpath.
   Admitted.
   
   Lemma unembedinv (n : nat × nat) : (unembed (embed n)) = n. 
@@ -110,3 +112,17 @@ Section EmbedNaturals.
 
   
 End EmbedNaturals.
+
+Lemma nat_ind_geq_n (n : nat) (P : nat → UU) : (P n) → (∏ (k : nat), (P (n + k) → (P (S (n + k))))) → (∏ (m : nat), (n ≤ m) → (P (m))).
+Proof. 
+  intros.
+  assert (∑ (k : nat), n + k = m).
+  - use tpair.
+    + exact (m - n).
+    + cbn beta. rewrite -> (natpluscomm n (m - n)). exact (minusplusnmm m n X1).
+  - destruct X2 as [k eq].
+    induction eq.
+    induction k.
+    + rewrite -> (natpluscomm n 0); simpl. exact X.
+    + rewrite -> (natplusnsm n k); simpl. apply (X0 k), (IHk (natlehnplusnm _ _)).
+  Defined.

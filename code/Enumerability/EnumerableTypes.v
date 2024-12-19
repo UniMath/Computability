@@ -3,7 +3,8 @@ Require Import Enumerability.EnumerablePredicates.
 Require Import Decidability.DecidablePredicates.
 Require Import Inductive.Option. 
 Require Import Inductive.Predicates.
-Require Import util.NaturalEmbedding. 
+Require Import util.NaturalEmbedding.
+Require Import Inductive.ListProperties.
 
 Section Definitions.
 
@@ -265,3 +266,62 @@ Section ClosureProperties.
   Qed.
   
 End ClosureProperties.
+
+Section ListEnumerability. 
+  Definition islistenumerator (X : UU) (L : nat → list X) := ∏ (x : X), ∃ (n : nat), (is_in x (L n)).
+
+  Definition listenumerator (X : UU) := ∑ (L : nat → list X), (islistenumerator X L).
+
+  Definition islistenumerable (X : UU) := ishinh (listenumerator X).
+
+  Lemma enumeratortolistenumerator (X : UU) (E : enumerator X) : (listenumerator X).
+  Proof.
+    destruct E as [E isenum].
+    use tpair. (**TODO: to replace with make_enumerator? **)
+    - intros n.
+      induction (E n).
+      + exact (cons a nil).
+      + exact nil.
+    - intros x.
+      use squash_to_prop.
+      + exact (hfiber E (some x)).
+      + exact (isenum x).
+      + apply propproperty.
+      + intros [n nfib]; clear isenum; apply hinhpr.
+        use tpair.
+        * exact n.
+        * cbn beta. rewrite -> nfib. right; apply idpath.
+  Defined.
+
+  Lemma listenumeratortoenumerator (X : UU) (L : listenumerator X) : (enumerator X). 
+  Proof. 
+    destruct L as [L islstenum].
+    use tpair.
+    - intros n.
+      destruct (unembed n) as [m1 m2]; clear n.
+      exact (pos (L m1) m2).
+    - intros x.
+      use squash_to_prop.  
+      + exact (∑ (n : nat), (is_in x (L n))).
+      + exact (islstenum x).
+      + apply propproperty.
+      + intros [n inn]; apply hinhpr.
+        use tpair.
+        * exact (embed (n,, (elem_pos x (L n) inn))).    
+        * cbn beta; rewrite -> unembedinv; simpl.   
+          apply poselem_posinv.
+  Defined.
+
+  Lemma weqisenumerableislistenumerable (X : UU) : (isenumerable X) ≃ (islistenumerable X).
+  Proof.
+    use weqiff.
+    - split; intros x; use (squash_to_prop x (propproperty _)); intros enum; apply hinhpr.
+      + exact (enumeratortolistenumerator X enum).
+      + exact (listenumeratortoenumerator X enum).
+    - apply propproperty. 
+    - apply propproperty.
+  Qed.
+
+  
+
+End ListEnumerability. 

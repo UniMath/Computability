@@ -1,5 +1,5 @@
 Require Import init.imports.
-Require Import UniMath.Combinatorics.Lists.
+Require Import Inductive.Option.
 
 Section Definitions.
 
@@ -203,7 +203,189 @@ Section Filter.
   
 End Filter.
 
+Section Position. 
+  Definition pos {X : UU} : (list X) → nat → @option X.
+  Proof.
+    use list_ind; cbn beta.
+    - exact (λ _, none).
+    - intros xs l f n.
+      induction n.
+      + exact (some xs).
+      + exact (f n).
+  Defined.
 
+  Definition elem_pos {X : UU} (x : X) (l : list X) (inn : is_in x l) : nat.
+  Proof.
+    revert l inn.
+    use list_ind.
+    - intros inn. apply fromempty; exact inn.
+    - intros x0 xs f inn.
+      destruct inn as [l | r].
+      + exact (S (f l)).
+      + exact 0.
+  Defined.
+
+  Lemma bla {X : UU} (x : X) (l : list X) (inn : is_in x l) (n : nat) : (elem_pos x l inn) = n → (pos l n) = (some x).
+  Proof.
+    revert l n inn.
+    use list_ind.
+    - intros n inn. exact (fromempty inn).
+    - cbn beta. intros x0 xs IHn n inn eq.
+      destruct inn as [l | r].
+      + induction n.
+        * apply fromempty. exact (negpathssx0 _ eq).
+        * assert (elem_pos x xs l = n) by exact (invmaponpathsS _ _ eq).
+          assert (pos (cons x0 xs) (S n) = pos xs n) by apply idpath.
+          rewrite X1. exact (IHn n l X0).
+      + induction n.
+        * assert (pos (cons x0 xs) 0 = some x0) by apply idpath; rewrite -> X0; apply maponpaths.
+          exact (pathsinv0 r).
+        * apply fromempty. exact (negpaths0sx _ eq).
+  Defined.
+
+  Lemma poselem_posinv {X : UU} (x : X) (l : list X) (inn : is_in x l) : pos l (elem_pos x l inn) = some x.
+  Proof.
+    apply (bla x l inn).
+    apply idpath.
+  Defined.
+
+End Position. 
+
+Section Append. 
+
+  Definition append {X : UU} : (list X) → (list X) → (list X). 
+  Proof. 
+    use list_ind; cbn beta.
+    - exact (idfun _).
+    - intros. exact (cons x (X0 X1)).
+  Defined.
+  
+  Section AppendTests.
+    Definition l0 : list nat := (cons 0 (cons 1 (cons 2 nil))).
+    Definition l1 : list nat := (cons 1 (cons 2 (cons 3 nil))).
+    Definition l2 : list nat := (cons 0 (cons 1 (cons 2 (cons 1 (cons 2 (cons 3 nil)))))).
+
+    Example testappend : (append l0 l1) = l2. Proof. apply idpath. Qed.
+
+    Example testappendnilleft : (append nil l1) = l1. Proof. apply idpath. Qed.
+    
+    Example testappendnilright: (append l2 nil) = l2. Proof. apply idpath. Qed. 
+
+  End AppendTests. 
+
+  (* Local Notation "l1 ++ l2" := (append l1 l2) (at level 60, left associativity).
+  Lemma appendnil1 {X : UU} (l1 : list X) : (l1 ++ nil) = l1.
+  Proof.
+    revert l1.
+    use list_ind; cbn beta; intros.
+    - apply idpath.
+    - exact (maponpaths (cons x) X0).
+  Qed.
+
+  Lemma appendnil1inv {X : UU} (l1 : list X) : l1 = (l1 ++ nil). 
+  Proof. 
+    apply pathsinv0, appendnil1.
+  Qed.
+  
+  Lemma appendnil2 {X : UU} (l1 : list X) : (nil ++ l1) = l1.
+  Proof. apply idpath. Qed.
+  
+  Lemma appendnil2inv {X : UU} (l2 : list X) : l2 = (nil ++ l2).
+  Proof. apply idpath. Qed.
+
+  Lemma appendtrans {X : UU} (l1 l2 l3 : list X) : (l1 ++ l2) ++ l3 = l1 ++ l2 ++ l3. 
+  Proof. *)
+   
+  Local Infix "++" := concatenate.
+
+  Lemma isin_concatenate1 {X : UU} (l1 l2 : list X) (x : X) : (is_in x l1) → (is_in x (l1 ++ l2)).
+  Proof.
+    revert l1.
+    use list_ind; cbn beta; intros. 
+    - apply fromempty; exact X0.
+    - rewrite -> (concatenateStep x0 xs l2).
+      destruct X1 as [l | r].
+      + left; apply X0; exact l.
+      + right; exact r.
+  Defined.
+  
+  Lemma isin_concatenate2 {X : UU} (l1 l2 : list X) (x : X) : (is_in x l2) → (is_in x (l1 ++ l2)).
+  Proof.
+    revert l1.
+    use list_ind; cbn beta; intros.
+    - rewrite -> (nil_concatenate l2); exact X0.
+    - rewrite -> (concatenateStep x0 xs l2). left. exact (X0 X1).
+  Defined.
+  
+  Lemma isin_concatenate_choice {X : UU} (l1 l2 : list X) (x : X) : (is_in x (l1 ++ l2)) → (is_in x l1) ⨿ (is_in x l2).
+  Proof.
+    revert l1.
+    use list_ind; cbn beta.
+    - rewrite -> nil_concatenate. intros inn; right; exact inn.
+    - intros x0 xs IHl. rewrite -> (concatenateStep x0 xs l2). intros [l | r].
+      + induction (IHl l) as [a | a]. left; left; exact a. right; exact a.
+      + left; right; exact r.
+  Defined. 
+End Append. 
+
+Section CumulativeFunctions.
+
+  Local Infix "++" := concatenate. 
+  Definition iscumulative {X : UU} (L : nat → list X) := ∏ (n : nat), ∃ (l : list X), (L (S n) = ((L n) ++ l)).
+
+  Lemma cumulativenleqm {X : UU} (L : nat → list X) (iscum : (iscumulative L)) (m n : nat) : n ≤ m → ∃ (l : list X), L m = (L n) ++ l.
+  Proof.
+    intros nleqm.
+    assert (eq : ∑ (k : nat), n + k = m).
+    - use tpair. 
+      + exact (m - n).
+      + cbn beta. rewrite -> (natpluscomm n (m - n)). apply (minusplusnmm _ _ nleqm).
+    - destruct eq as [k eq].
+      induction eq; induction k.
+      + rewrite (natpluscomm n 0). apply hinhpr. use (tpair _ nil). simpl. rewrite -> (concatenate_nil (L n)). apply idpath.
+      + rewrite (natplusnsm n k); use (squash_to_prop (iscum (n + k)) (propproperty _)); intros [l eq]; clear iscum.
+        use (squash_to_prop (IHk (natlehnplusnm _ _)) (propproperty _)); intros [l0 neq]; clear IHk; apply hinhpr.
+        use (tpair _ (l0 ++ l)). simpl. rewrite -> eq, neq. apply assoc_concatenate.
+  Qed.  
+         
+  Definition cumul {X : UU} : (nat → list X) → (nat → list X). 
+  Proof.
+  intros L n.
+  induction n.
+  - exact (L 0).
+  - exact (IHn ++ (L (S n))).
+  Defined.
+  
+  Lemma iscumulativecumul {X : UU} (L : nat → list X) : (iscumulative (cumul L)).
+  Proof.
+    intros n; induction n. 
+    - apply hinhpr.
+      use (tpair _ (L 1) (idpath _)).
+    - use (squash_to_prop IHn (propproperty _)); intros IH; clear IHn; apply hinhpr.
+      use (tpair _ (L (S (S n))) (idpath _)). 
+  Defined.
+
+  Lemma isinlisincumull {X : UU} (L : nat → list X) (x : X) (n : nat) : (is_in x (L n)) → (is_in x (cumul L n)).
+  Proof.
+    intros inn.
+    induction n.
+    - exact inn.
+    - simpl. apply isin_concatenate2. exact inn.
+  Defined.        
+
+  Lemma iscumulex {X : UU} (L : nat → list X) (x : X) : (∃ (n : nat), (is_in x (L n))) <-> (∃ (n : nat), (is_in x (cumul L n))).
+  Proof.
+  split; intros ex; use (squash_to_prop ex (propproperty _)); clear ex; intros [n inn]; apply hinhpr.
+  - use (tpair _ n); cbn beta.        
+    apply isinlisincumull. exact inn.
+  - induction n.
+    + use (tpair _ 0). exact inn.
+    + induction (isin_concatenate_choice (cumul L n) (L (S n)) x inn).
+      * exact (IHn a).
+      * exact ((S n),, b).
+  Defined. 
+
+End CumulativeFunctions. 
 
 Section Properties.
 
