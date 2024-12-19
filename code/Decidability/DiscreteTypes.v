@@ -1,4 +1,7 @@
 Require Import init.imports.
+Require Import UniMath.Combinatorics.Lists.
+Require Import UniMath.Combinatorics.MoreLists.
+Require Import Inductive.Option.
   
 Section EqualityDeciders.
 
@@ -138,12 +141,4 @@ Section ClosureProperties.
         * exact inr.
   Qed.
 
-
-  
-  
 End ClosureProperties.
-
-
-Section ChoiceFunction.
-
-End ChoiceFunction.
