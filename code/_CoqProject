@@ -11,6 +11,7 @@ util/range_equiv.v
 util/NaturalEmbedding.v
 
 Inductive/Predicates.v
+Inductive/ListProperties.v
 Inductive/Option.v
 
 Decidability/DecidablePredicates.v
@@ -18,3 +19,5 @@ Decidability/DiscreteTypes.v
 
 Enumerability/EnumerablePredicates.v
 Enumerability/EnumerableTypes.v 
+
+Reducibility/ManyOneReductions.v
