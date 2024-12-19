@@ -1,3 +1,5 @@
+
+(* Definition of an option as the coproduct of a type X with the unit type *)
 Require Import init.imports. 
 
 Section Option.
@@ -28,4 +30,3 @@ Section PathProperties.
   
   
 End PathProperties.
-
