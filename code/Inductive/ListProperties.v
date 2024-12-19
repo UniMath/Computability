@@ -270,8 +270,5 @@ Section Properties.
         * split.
           -- right. apply idpath.
           -- exact b.
-  Qed.
-  
-                
-             
+  Qed.  
 End Properties.
