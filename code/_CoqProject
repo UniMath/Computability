@@ -8,9 +8,13 @@ init/imports.v
 init/all.v
 
 util/range_equiv.v
+util/NaturalEmbedding.v
 
 Inductive/Predicates.v
 Inductive/Option.v
 
 Decidability/DecidablePredicates.v
 Decidability/DiscreteTypes.v
+
+Enumerability/EnumerablePredicates.v
+Enumerability/EnumerableTypes.v 

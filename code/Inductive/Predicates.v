@@ -33,5 +33,7 @@ Section Operations.
     - exact (p a).
     - exact (q b). 
   Defined.
+
+  Definition truepred (X : UU) : X → hProp := (λ _ , htrue). 
   
 End Operations.

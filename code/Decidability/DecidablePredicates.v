@@ -104,7 +104,7 @@ Section Properties.
       + exact (isapropdecider p).
       + exact (isapropdeptypeddecider p).
   Qed.
-  
+
 End Properties.
 
 Section ClosureProperties.
