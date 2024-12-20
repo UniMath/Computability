@@ -117,6 +117,58 @@ Section TypePredicateEnumerabilityEquivalence.
   
 End TypePredicateEnumerabilityEquivalence. 
 
+Section StrongEnumerability. 
+
+  Definition isstrongenumerator (X : UU) (f : nat → X) := (issurjective f).
+
+  Definition strongenumerator (X : UU) := ∑ (f : nat → X), isstrongenumerator X f.
+
+  Definition isstrongenumerable (X : UU) := ishinh (strongenumerator X).
+
+  Lemma strongenumeratortoenumerator {X : UU} : strongenumerator X → enumerator X.
+  Proof.
+    intros [f isstrenum].
+    use tpair; cbn beta. 
+    - intros n. exact (some (f n)).
+    - intros x. use (squash_to_prop (isstrenum x) (propproperty _)); intros [n eq]; clear isstrenum; apply hinhpr.
+      use tpair; cbn beta. exact n. rewrite -> eq. apply idpath.
+  Defined.
+
+  Lemma isstrongenumerabletoisenumerable {X : UU} : isstrongenumerable X → isenumerable X.
+  Proof. 
+    intros enum. use (squash_to_prop enum (propproperty _)); clear enum; intros enum; apply hinhpr.
+    apply strongenumeratortoenumerator. exact enum.
+  Qed.
+
+  Lemma inhabittedenumeratortostrongenumerator {X : UU} : X → enumerator X → strongenumerator X.
+  Proof.
+    intros x [f isenum].
+    use tpair.
+    - intros n. induction (f n).
+      + exact a.
+      + exact x.
+    - intros y. use (squash_to_prop (isenum y) (propproperty _)); intros [n eq]; apply hinhpr.
+      use tpair.
+      exact n. cbn beta. rewrite -> eq. apply idpath.
+  Defined.
+  
+  Lemma inhabittedenumerabletostrongenumerable {X : UU} : (ishinh X) → isenumerable X → isstrongenumerable X.
+  Proof.
+    intros x isenum.
+    use (squash_to_prop x (propproperty _)); clear x; intros x.
+    use (squash_to_prop (isenum) (propproperty _)); clear isenum; intros enum. apply hinhpr.
+    apply inhabittedenumeratortostrongenumerator. exact x. exact enum.
+  Qed.
+
+  Lemma strongenumerableinhabitted {X : UU} : isstrongenumerable X → (ishinh X). 
+  Proof.
+    intros isenum.
+    use (squash_to_prop (isenum) (propproperty _)); clear isenum; intros [f isenum]; apply hinhpr.
+    exact (f 0).
+  Qed.   
+
+End StrongEnumerability. 
+
 Section ClosureProperties.
   
   Lemma enumeratornat : (isenumerator nat (λ (n : nat), (some n))).
@@ -265,7 +317,39 @@ Section ClosureProperties.
     - exact (nat_rect (λ _, @option (@option X)) (some none) (λ (n : nat) _, some (f n))).
     - exact (enumeratoroption X f enumx).
   Qed.
-  
+
+  Lemma kfinstructenumerator {X : UU} (kfin : kfinstruct X) : (enumerator X). 
+  Proof.
+  destruct kfin as [n [f issurj]].
+  use tpair.
+  - intros m.
+    induction (natlthorgeh m n).
+    + exact (some (f (m,, a))).
+    + exact none.
+  - intros ?.
+    use (squash_to_prop (issurj x) (propproperty _)); clear issurj; intros [[m nltm] eq]. apply hinhpr.
+    use tpair. exact m. cbn beta. induction (natlthorgeh m n); simpl.
+    assert (a = nltm) by apply propproperty. rewrite -> X0. rewrite <- eq. apply idpath.
+    apply fromempty. apply (natgehtonegnatlth _ _ b). exact nltm.
+  Defined.
+
+  Lemma iskfiniteisenumerable {X : UU} : (iskfinite X) → (isenumerable X).
+  Proof.
+    intros isk. use (squash_to_prop isk (propproperty _)); intros enum; apply hinhpr.
+    apply kfinstructenumerator. exact enum.
+  Qed.
+
+  Lemma finstructenumerator {X : UU} : (finstruct X) → (enumerator X).
+  Proof.
+    intros finstr. apply kfinstructenumerator. apply kfinstruct_finstruct.
+    exact finstr.
+  Defined. 
+
+  Lemma isfiniteisenumerable {X : UU} : (isfinite X) → (isenumerable X). 
+  Proof. 
+    intros isf. use (squash_to_prop isf (propproperty _)); intros finstr; apply hinhpr.
+    exact (finstructenumerator finstr).
+  Qed.
 End ClosureProperties.
 
 Section ListEnumerability. 
