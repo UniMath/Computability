@@ -1,6 +1,7 @@
 Require Import init.imports.
 Require Import Enumerability.EnumerablePredicates.
 Require Import Decidability.DecidablePredicates.
+Require Import util.NaturalEmbedding.
 Require Import Inductive.Option. 
 Require Import Inductive.Predicates.
 Require Import util.NaturalEmbedding.
@@ -322,6 +323,57 @@ Section ListEnumerability.
     - apply propproperty.
   Qed.
 
+  Local Infix "++" := concatenate. 
+
+  Definition listfun (X : UU) (L : nat → list X) : (nat → (list (list X))). 
+  Proof.
+    intros n; induction n.
+    - exact (cons nil nil).
+    - exact (IHn ++ (map (λ (x : (X×(list X))), (cons (pr1 x) (pr2 x))) (list_prod (cumul L n) IHn))).
+  Defined.
   
+  Lemma iscumulativelistfun (X : UU) (L : nat → list X) : (iscumulative (listfun X L)).
+  Proof.
+    intros ?; simpl.
+    use (tpair _ (map (λ x : X × list X, cons (pr1 x) (pr2 x)) (list_prod (cumul L n) (listfun X L n)))); apply idpath.
+  Defined. 
+
+  Lemma listlistenumerator (X : UU) (L : nat → list X) : (islistenumerator X L) → (islistenumerator (list X) (listfun X L)).
+  Proof.
+    intros lstenm.
+    use list_ind; cbn beta.
+    - apply hinhpr. use (tpair _ 0). right; apply idpath.
+    - intros.
+      use (squash_to_prop X0 (propproperty _)); intros [n inn1]; clear X0. 
+      use (squash_to_prop (lstenm x) (propproperty _)); intros [m inn2]; clear lstenm.
+      apply hinhpr; use tpair; cbn beta. 
+      + induction (natlthorgeh n m). exact (S m). exact (S n).
+      + induction (natlthorgeh n m); simpl.
+        * induction m. apply fromempty. apply (negnatlthn0 n a). 
+          set (q := (isincumulleh _ _ (iscumulativelistfun _ _) n (S m) (natlthtoleh _ _ a) inn1)).
+          simpl. apply isin_concatenate2. apply (is_inmap (λ (x : X × (list X)), (cons (pr1 x) (pr2 x))) _ (x,, xs)), inn_list_prod1. apply isin_concatenate2. exact inn2.
+          exact q.
+        * induction n. set (q := (nat0gehtois0 m b)). induction (pathsinv0 q). clear q. 
+          apply isin_concatenate2. apply (is_inmap (λ (x : X × (list X)), (cons (pr1 x) (pr2 x))) _ (x,, xs)). apply inn_list_prod1. exact inn2. exact inn1.
+          apply isin_concatenate2. apply (is_inmap (λ (x : X × (list X)), (cons (pr1 x) (pr2 x))) _ (x,, xs)). apply inn_list_prod1. 
+          assert (inn3 : is_in x (cumul L m)) by apply (isinlisincumull _ _ _ inn2).
+          apply (isincumulleh _ _ (iscumulativecumul _) m (S n) b inn3).
+          apply inn1.
+  Defined.  
+          
+  Lemma islistenumerablelist {X : UU} (isenum : islistenumerable X) : (islistenumerable (list X)). 
+  Proof.
+    use squash_to_prop.
+    - exact (listenumerator X).
+    - exact isenum.
+    - apply propproperty.
+    - clear isenum; intros [L isenum]. apply hinhpr.
+      exact ((listfun X L),, (listlistenumerator X L isenum)).
+  Qed.
+  
+  Lemma isenumerablelist {X : UU} (isenum : isenumerable X) : (isenumerable (list X)). 
+  Proof.
+    apply weqisenumerableislistenumerable, islistenumerablelist, weqisenumerableislistenumerable. exact isenum.
+  Qed. 
 
 End ListEnumerability. 

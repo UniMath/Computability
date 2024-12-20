@@ -272,30 +272,7 @@ Section Append.
     Example testappendnilright: (append l2 nil) = l2. Proof. apply idpath. Qed. 
 
   End AppendTests. 
-
-  (* Local Notation "l1 ++ l2" := (append l1 l2) (at level 60, left associativity).
-  Lemma appendnil1 {X : UU} (l1 : list X) : (l1 ++ nil) = l1.
-  Proof.
-    revert l1.
-    use list_ind; cbn beta; intros.
-    - apply idpath.
-    - exact (maponpaths (cons x) X0).
-  Qed.
-
-  Lemma appendnil1inv {X : UU} (l1 : list X) : l1 = (l1 ++ nil). 
-  Proof. 
-    apply pathsinv0, appendnil1.
-  Qed.
   
-  Lemma appendnil2 {X : UU} (l1 : list X) : (nil ++ l1) = l1.
-  Proof. apply idpath. Qed.
-  
-  Lemma appendnil2inv {X : UU} (l2 : list X) : l2 = (nil ++ l2).
-  Proof. apply idpath. Qed.
-
-  Lemma appendtrans {X : UU} (l1 l2 l3 : list X) : (l1 ++ l2) ++ l3 = l1 ++ l2 ++ l3. 
-  Proof. *)
-   
   Local Infix "++" := concatenate.
 
   Lemma isin_concatenate1 {X : UU} (l1 l2 : list X) (x : X) : (is_in x l1) → (is_in x (l1 ++ l2)).
@@ -328,12 +305,51 @@ Section Append.
   Defined. 
 End Append. 
 
+Section ListProduct. 
+Local Infix "++" := concatenate. 
+  Definition list_prod {X Y : UU} (l1 : list X) (l2 : list Y) : (list (X × Y)).
+  Proof. 
+    revert l1.
+    use list_ind; cbn beta.  
+    - exact nil.
+    - intros; exact ((map (λ (y : Y), (x,, y)) l2) ++ X0).
+  Defined.
+  
+  Lemma inn_list_prod1 {X Y : UU} (l1 : list X) (l2 : list Y) (x : X) (y : Y) : (is_in x l1) → (is_in y l2) → (is_in (x,, y) (list_prod l1 l2)). 
+  Proof. 
+    revert l1.
+    use list_ind; cbn beta.
+    - exact fromempty.
+    - intros x0 xs IHl inn1 inn2.
+      destruct inn1 as [l | r]. 
+      + apply isin_concatenate2. exact (IHl l inn2).
+      + apply isin_concatenate1. rewrite <- r. clear IHl r x0.
+        revert l2 inn2. use list_ind; cbn beta.
+        * exact (fromempty).
+        * intros y0 ys IHl [l | r]; rewrite -> (mapStep).
+          -- left. exact (IHl l).
+          -- right. rewrite -> r. apply idpath.
+  Defined.           
+End ListProduct. 
+
+Section Map. 
+
+  Lemma is_inmap {X Y : UU} (f : X → Y) (l : list X) (x : X) : (is_in x l) → (is_in (f x) (map f l)).
+  Proof. 
+    revert l. use list_ind; cbn beta.
+    - exact fromempty.
+    - intros x0 xs IHl [l | r].
+      + left. exact (IHl l).
+      + right. apply maponpaths. exact r.
+  Defined.  
+End Map. 
+
 Section CumulativeFunctions.
 
   Local Infix "++" := concatenate. 
-  Definition iscumulative {X : UU} (L : nat → list X) := ∏ (n : nat), ∃ (l : list X), (L (S n) = ((L n) ++ l)).
+  Definition iscumulative {X : UU} (L : nat → list X) := ∏ (n : nat), ∑ (l : list X), (L (S n) = ((L n) ++ l)).
 
-  Lemma cumulativenleqm {X : UU} (L : nat → list X) (iscum : (iscumulative L)) (m n : nat) : n ≤ m → ∃ (l : list X), L m = (L n) ++ l.
+  Lemma cumulativenleqm {X : UU} (L : nat → list X) (iscum : (iscumulative L)) (m n : nat) : n ≤ m → ∑ (l : list X), L m = (L n) ++ l.
   Proof.
     intros nleqm.
     assert (eq : ∑ (k : nat), n + k = m).
@@ -342,11 +358,11 @@ Section CumulativeFunctions.
       + cbn beta. rewrite -> (natpluscomm n (m - n)). apply (minusplusnmm _ _ nleqm).
     - destruct eq as [k eq].
       induction eq; induction k.
-      + rewrite (natpluscomm n 0). apply hinhpr. use (tpair _ nil). simpl. rewrite -> (concatenate_nil (L n)). apply idpath.
-      + rewrite (natplusnsm n k); use (squash_to_prop (iscum (n + k)) (propproperty _)); intros [l eq]; clear iscum.
-        use (squash_to_prop (IHk (natlehnplusnm _ _)) (propproperty _)); intros [l0 neq]; clear IHk; apply hinhpr.
+      + rewrite (natpluscomm n 0). use (tpair _ nil). simpl. rewrite -> (concatenate_nil (L n)). apply idpath.
+      + rewrite (natplusnsm n k); destruct (iscum (n + k)) as [l eq]; clear iscum.
+        destruct (IHk (natlehnplusnm _ _)) as [l0 neq]; clear IHk.
         use (tpair _ (l0 ++ l)). simpl. rewrite -> eq, neq. apply assoc_concatenate.
-  Qed.  
+  Qed.
          
   Definition cumul {X : UU} : (nat → list X) → (nat → list X). 
   Proof.
@@ -359,10 +375,8 @@ Section CumulativeFunctions.
   Lemma iscumulativecumul {X : UU} (L : nat → list X) : (iscumulative (cumul L)).
   Proof.
     intros n; induction n. 
-    - apply hinhpr.
-      use (tpair _ (L 1) (idpath _)).
-    - use (squash_to_prop IHn (propproperty _)); intros IH; clear IHn; apply hinhpr.
-      use (tpair _ (L (S (S n))) (idpath _)). 
+    - use (tpair _ (L 1) (idpath _)).
+    - use (tpair _ (L (S (S n))) (idpath _)). 
   Defined.
 
   Lemma isinlisincumull {X : UU} (L : nat → list X) (x : X) (n : nat) : (is_in x (L n)) → (is_in x (cumul L n)).
@@ -371,7 +385,14 @@ Section CumulativeFunctions.
     induction n.
     - exact inn.
     - simpl. apply isin_concatenate2. exact inn.
-  Defined.        
+  Defined.
+
+  Lemma isincumulleh {X : UU} (L : nat → list X) (x : X) (iscum : iscumulative L) (n m: nat) : (n ≤ m) → (is_in x (L n)) → (is_in x (L m)).
+  Proof. 
+    intros leq inn.
+    set (q := cumulativenleqm L iscum m n leq); destruct q as [l eq]; rewrite -> eq.
+    apply isin_concatenate1. exact inn.
+  Defined.   
 
   Lemma iscumulex {X : UU} (L : nat → list X) (x : X) : (∃ (n : nat), (is_in x (L n))) <-> (∃ (n : nat), (is_in x (cumul L n))).
   Proof.
@@ -383,7 +404,7 @@ Section CumulativeFunctions.
     + induction (isin_concatenate_choice (cumul L n) (L (S n)) x inn).
       * exact (IHn a).
       * exact ((S n),, b).
-  Defined. 
+  Defined.
 
 End CumulativeFunctions. 
 
