@@ -116,7 +116,7 @@ Section TypePredicateEnumerabilityEquivalence.
   Qed.
   
 End TypePredicateEnumerabilityEquivalence. 
-
+ 
 Section StrongEnumerability. 
 
   Definition isstrongenumerator (X : UU) (f : nat → X) := (issurjective f).
@@ -460,4 +460,4 @@ Section ListEnumerability.
     apply weqisenumerableislistenumerable, islistenumerablelist, weqisenumerableislistenumerable. exact isenum.
   Qed. 
 
-End ListEnumerability. 
+End ListEnumerability.
