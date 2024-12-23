@@ -1,5 +1,5 @@
-(* Definition of an option as the coproduct of a type X with the unit type *)
 
+(* Definition of an option as the coproduct of a type X with the unit type *)
 Require Import init.imports. 
 
 Section Option.
@@ -10,3 +10,23 @@ Section Option.
   Definition none {X : UU} : @option X := (ii2 tt).
   
 End Option.
+
+Section PathProperties.
+
+  Lemma nopathssomenone {X : UU} (x : X) : ¬ ((some x) = none). 
+  Proof.
+    apply negpathsii1ii2.
+  Qed.
+
+  Lemma nopathsnonesome {X : UU} (x : X) : ¬ (none = (some x)).
+  Proof.
+    apply negpathsii2ii1.
+  Qed.
+
+  Lemma some_injectivity {X : UU} (x y : X) : (some x = some y) → x = y.
+  Proof.
+    apply ii1_injectivity.
+  Qed.
+  
+  
+End PathProperties.

@@ -41,3 +41,4 @@ Makefile.conf
 *.vok
 *.vos
 _build/
+agda
