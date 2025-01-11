@@ -1,5 +1,6 @@
 Require Import init.imports.
 Require Import Decidability.DecidablePredicates.
+Require Import Inductive.Predicates.
 
   
 Section ManyOneReducibility.
@@ -71,55 +72,45 @@ Proof.
 Qed.
 
 (* Many one reducibility forms an upper semi-lattice *)
-
-Definition coprod_pred {X Y : UU} (p : X → hProp) (q : Y → hProp) : (X ⨿ Y) → hProp.
-Proof.
-  intros [a | b].
-  - exact (p a).
-  - exact (q b).
-Defined.
-
-Notation "p + q" := (coprod_pred p q).
-
-Lemma isreduction_ii1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (ismanyonereduction p (p + q) ii1).
+Lemma isreduction_ii1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (ismanyonereduction p (predcoprod p q) ii1).
 Proof.
 intros x.
 split; apply idfun.
 Defined.
 
-Lemma isreduction_ii2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (ismanyonereduction q (p + q) ii2).
+Lemma isreduction_ii2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (ismanyonereduction q (predcoprod p q) ii2).
 Proof.
   intros x.
   split; apply idfun.
 Defined.
 
-Lemma reduction_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (reduction p (p+q)).
+Lemma reduction_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (reduction p (predcoprod p q)).
 Proof.
   use make_reduction.
   - apply ii1.
   - apply isreduction_ii1.
 Defined.
 
-Lemma reduction_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (reduction q (p + q)).
+Lemma reduction_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (reduction q (predcoprod p q)).
 Proof.
   use make_reduction.
   - apply ii2.
   - apply isreduction_ii2.
 Defined.
 
-Lemma isreducible_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ₘ (p + q)).
+Lemma isreducible_coprod1 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (p ≼ₘ (predcoprod p q)).
 Proof.
   apply hinhpr.
   apply reduction_coprod1.
 Qed.
 
-Lemma isreducible_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (q ≼ₘ (p + q)).
+Lemma isreducible_coprod2 {X Y : UU} (p : X → hProp) (q : Y → hProp) : (q ≼ₘ (predcoprod p q)).
 Proof.
   apply hinhpr.
   apply reduction_coprod2.
 Qed.
 
-Lemma isreduction_sumofmaps {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) (f : X → Z) (g : Y → Z) : (ismanyonereduction p r f) → (ismanyonereduction q r g) → (ismanyonereduction (p + q) r (sumofmaps f g)).
+Lemma isreduction_sumofmaps {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) (f : X → Z) (g : Y → Z) : (ismanyonereduction p r f) → (ismanyonereduction q r g) → (ismanyonereduction (predcoprod p q) r (sumofmaps f g)).
 Proof.
   intros isf isg x.
   induction x.
@@ -127,7 +118,7 @@ Proof.
   - exact (isg b).
 Qed.
 
-Lemma reduction_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (reduction p r) → (reduction q r) → (reduction (p + q) r).
+Lemma reduction_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (reduction p r) → (reduction q r) → (reduction (predcoprod p q) r).
 Proof.
   intros [f irf] [g irg].
   use make_reduction.
@@ -135,7 +126,7 @@ Proof.
   - exact (isreduction_sumofmaps p q r f g irf irg).
 Defined.
 
-Lemma isreducible_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ₘ r) → (q≼ₘ r) → ((p + q) ≼ₘ r).
+Lemma isreducible_coprod {X Y Z : UU} (p : X → hProp) (q : Y → hProp) (r : Z → hProp) : (p ≼ₘ r) → (q≼ₘ r) → ((predcoprod p q) ≼ₘ r).
 Proof.
   apply hinhfun2, reduction_coprod.
 Qed.
@@ -206,6 +197,23 @@ Proof.
     set (nf := fundneg isr1).
     apply isr2, (X0 (f x)).
     exact (nf nnpx).
+Qed.
+
+Example eq0manyonered : ((λ x, ishinh (¬ (x = 0))) ≼ₘ (λ x, ishinh (x = 0))).
+Proof.
+  apply hinhpr.
+  use make_reduction.
+  - intros n. destruct n as [ | n' ]. exact 1. exact 0.
+  - simpl. intros x.
+    destruct x as [ | x'].
+    + split; intros;
+      use squash_to_prop.
+        exact (0 != 0). exact X.
+        apply propproperty. intros contra. apply fromempty, contra, idpath.
+        exact (1 = 0). exact X. apply propproperty. intros contra. apply fromempty. apply (negpathssx0 0), contra.
+    + split; intros; apply hinhpr.
+      * apply idpath.
+      * apply negpathssx0.
 Qed.
 
 End ManyOneReducibility.
