@@ -112,7 +112,4 @@ Section ManyManyOneOneCharacterisation.
       apply isoneonereducible_ismanyonereducible, X0.
       apply predcylinder2.
   Qed.
-
-  
-
 End ManyManyOneOneCharacterisation.

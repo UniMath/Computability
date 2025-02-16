@@ -92,3 +92,16 @@ Proof.
     + rewrite -> (natpluscomm n 0); simpl. exact X.
     + rewrite -> (natplusnsm n k); simpl. apply (X0 k), (IHk (natlehnplusnm _ _)).
   Defined.
+
+Lemma natnatequiv : nat × nat ≃ nat. 
+Proof. 
+  unfold "≃".
+  use tpair.
+  - exact embed.
+  - simpl. use isweq_iso.
+    + exact unembed.
+    + apply unembedinv.
+    + apply embedinv.
+Qed.
+
+Search (_ ≃ _).
