@@ -165,8 +165,6 @@ Proof.
     exact rect.
 Qed.
 
-Definition lem := ∏ (P : UU), (isaprop P) → P ⨿ ¬P.
-
 Definition isstable {X : UU} (p : X → hProp) := ∏ (x : X), (hneg (hneg (p x))) → (p x).
 
 Lemma isapropisstable {X : UU} (p : X → hProp) : (isaprop (isstable p)).
@@ -215,5 +213,43 @@ Proof.
       * apply idpath.
       * apply negpathssx0.
 Qed.
+
+Definition DNEG_ELIM := ∏ (P : UU) , isaprop P → (¬ (¬ P)) → P.
+Definition DNEG_REDUCTION1 := ∏ (p : unit → hProp) , (p ≼ₘ (predcompl (predcompl p))).
+Definition DNEG_REDUCTION2 := ∏ (p : unit → hProp) , ((predcompl (predcompl p)) ≼ₘ p).
+
+Lemma dneg_reduction1_to_lem : DNEG_REDUCTION1 → DNEG_ELIM.
+Proof.
+  intros DNEG_REDUCTION.
+  intros P isapropP dneg.
+  set (hP := make_hProp P isapropP).
+  set (p := λ t : unit , hP).
+  set (red := (DNEG_REDUCTION p)).
+  use squash_to_prop.
+  - exact (reduction p (predcompl (predcompl p))).
+  - exact red.
+  - exact isapropP.
+  - intros [f isr].
+    set (r := isr tt). simpl in r. destruct r as [r1 r2].
+    apply r2.
+    exact dneg.
+Qed.   
+
+Lemma dneg_reduction2_to_lem : DNEG_REDUCTION2 → DNEG_ELIM.
+Proof.
+  intros DNEG_REDUCTION.
+  intros P isapropP dneg.
+  set (hP := make_hProp P isapropP).
+  set (p := λ t : unit , hP).
+  set (red := (DNEG_REDUCTION p)).
+  use squash_to_prop.
+  - exact (reduction (predcompl (predcompl p)) p).
+  - exact red.
+  - exact isapropP.
+  - intros [f isr].
+    set (r := isr tt). simpl in r. destruct r as [r1 r2].
+    exact (r1 dneg).
+Qed.
+
 
 End ManyOneReducibility.

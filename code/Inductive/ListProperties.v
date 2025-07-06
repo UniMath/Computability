@@ -76,9 +76,27 @@ Section DistinctList.
     - exact unit.
     - intros.
       exact (X0 × ¬(is_in x xs)).
-  Defined.
+  Defined.  
 
-  Definition hdistinct {X : UU} : (list X) → hProp := (λ l : (list X), ∥distinctterms l∥).
+  Lemma distincttermscons {X : UU} (x : X) (xs : list X) : (distinctterms (cons x xs)) = ((distinctterms xs) × ¬(is_in x xs)).
+  Proof.
+    reflexivity.
+  Qed.
+
+
+  Lemma isapropdistinctterms {X : UU} : ∏ (l : list X), isaprop (distinctterms l).
+  Proof.
+    use list_ind; simpl.
+    - exact isapropunit.
+    - intros x xs H. rewrite distincttermscons.
+      apply isapropdirprod.
+      + exact H.
+      + apply isapropimpl, isapropempty.
+  Qed.  
+
+  Search "make_hProp".
+
+  Definition hdistinct {X : UU} (l : list X) : hProp := make_hProp (distinctterms l) (isapropdistinctterms l).
   
 End DistinctList.
 
