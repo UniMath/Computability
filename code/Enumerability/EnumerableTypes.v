@@ -11,7 +11,7 @@ Section Definitions.
 
   Definition isenumerator (X : UU) (f : nat → @option X) := ∏ (x : X), ∃ (n : nat), (f n) = some x.    
   Definition enumerator (X : UU) := ∑ (f : nat → @option X), (isenumerator X f). 
-  Definition isenumerable (X : UU) := ∥enumerator X∥. 
+  Definition isenumerable (X : UU) := ∥enumerator X∥.
 
   Lemma isapropisenumerator (X : UU) (f : nat → @option X) : isaprop (isenumerator X f).
   Proof. 
@@ -267,7 +267,7 @@ Section ClosureProperties.
       + unfold enumeratorfunctioncoprod.
         rewrite -> (unembedinv), hfibg.
         simpl. apply idpath.
-  Qed.  
+  Qed.
   
   Lemma isenumerablenat : (isenumerable nat).
   Proof.
@@ -275,7 +275,7 @@ Section ClosureProperties.
     exact ((λ (n : nat), (some n)),, enumeratornat).
   Qed.
 
-  Lemma isenumerablebool : (isenumerable bool). 
+  Lemma isenumerablebool : (isenumerable bool).
   Proof.
     apply hinhpr.
     use tpair.
@@ -283,7 +283,7 @@ Section ClosureProperties.
     exact (enumeratorbool).
   Qed.
 
-  Lemma isenumerabledirprod (X Y : UU) : (isenumerable X) → (isenumerable Y) → (isenumerable (X × Y)). 
+  Lemma isenumerabledirprod (X Y : UU) : (isenumerable X) → (isenumerable Y) → (isenumerable (X × Y)).
   Proof.
     intros isenumf isenumg. 
     use (squash_to_prop (isenumf) (propproperty _)). 
@@ -343,7 +343,7 @@ Section ClosureProperties.
   Proof.
     intros finstr. apply kfinstructenumerator. apply kfinstruct_finstruct.
     exact finstr.
-  Defined. 
+  Defined.
 
   Lemma isfiniteisenumerable {X : UU} : (isfinite X) → (isenumerable X). 
   Proof. 
@@ -403,7 +403,7 @@ Section ListEnumerability.
     - split; intros x; use (squash_to_prop x (propproperty _)); intros enum; apply hinhpr.
       + exact (enumeratortolistenumerator X enum).
       + exact (listenumeratortoenumerator X enum).
-    - apply propproperty. 
+    - apply propproperty.
     - apply propproperty.
   Qed.
 
@@ -420,7 +420,7 @@ Section ListEnumerability.
   Proof.
     intros ?; simpl.
     use (tpair _ (map (λ x : X × list X, cons (pr1 x) (pr2 x)) (list_prod (cumul L n) (listfun X L n)))); apply idpath.
-  Defined. 
+  Defined.
 
   Lemma listlistenumerator (X : UU) (L : nat → list X) : (islistenumerator X L) → (islistenumerator (list X) (listfun X L)).
   Proof.

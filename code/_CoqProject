@@ -21,3 +21,4 @@ Enumerability/EnumerablePredicates.v
 Enumerability/EnumerableTypes.v 
 
 Reducibility/ManyOneReductions.v
+Reducibility/OneOneReductions.v

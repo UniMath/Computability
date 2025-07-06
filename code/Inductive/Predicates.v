@@ -9,7 +9,7 @@ properties.
 
 
 Section Operations.
-
+  
   Definition predconj {X : UU} (p q : X → hProp) : X → hProp := (λ x : X, (p x) ∧ (q x)).
   
   Definition preddisj {X : UU} (p q : X → hProp) : X → hProp := (λ x : X, (p x) ∨ (q x)).
@@ -28,8 +28,12 @@ Section Operations.
     - exact (q b). 
   Defined.
 
+  Infix "p + q" := (predcoprod p q) (at level 25).
+
   Definition truepred (X : UU) : X → hProp := (λ _ , htrue). 
   
   Definition falsepred (X : UU) : X → hProp := (λ _, hfalse).
+
+  Definition predcylinder {X : UU} (p : X → hProp) (Z : UU) : X × Z → hProp := (preddirprod p (truepred Z)).
 
 End Operations.
